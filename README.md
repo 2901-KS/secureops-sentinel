@@ -1,7 +1,23 @@
 # SecureOps Sentinel 
-
-> Security Infrastructure Observability Stack
-> Real-time threat monitoring using Prometheus, Grafana, AlertManager, and Slack
+ 
+> **Security Infrastructure Observability Stack**
+> Built to mirror real-world InfoSec SRE workflows — real-time threat detection, automated alerting, and multi-source metric ingestion using industry-standard tools.
+ 
+---
+ 
+## What is SecureOps Sentinel?
+ 
+Most monitoring tools tell you something went wrong *after* it happened. **SecureOps Sentinel is built to catch it while it's happening.**
+ 
+It simulates a production security service — generating realistic threat signals like brute-force bursts, suspicious IP clusters, and API rate violations — then runs them through a full observability pipeline: metrics scraped by Prometheus every 15 seconds, visualised across 8 live Grafana panels, and routed through AlertManager to fire Slack notifications the moment a threshold is breached.
+ 
+What makes this different from a typical monitoring demo:
+ 
+- **Security-first metrics** — not CPU or memory, but `failed_login_total`, `brute_force_attempts`, `suspicious_ip_count` — the signals a real InfoSec team tracks
+- **Dual ingestion paths** — FastAPI exposes a `/metrics` endpoint for Prometheus pull; a Bash log parser pushes structured metrics to Pushgateway independently
+- **Severity-aware alerting** — critical and warning alerts route to separate Slack receivers with different formatting and repeat intervals
+- **Fully containerised** — one `docker compose up` brings up 5 services with zero manual configuration
+- **Simulation endpoints** — `/simulate/brute-force`, `/simulate/login-spike`, `/simulate/rate-limit` let you fire real incidents on demand and watch the pipeline respond in real time
 
 ---
 
