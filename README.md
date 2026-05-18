@@ -62,7 +62,7 @@ Simulation endpoints    AlertManager  ──────────────
 <img width="1861" height="908" alt="Screenshot 2026-05-18 115707" src="https://github.com/user-attachments/assets/fa04bc89-15a8-46ec-a1f0-6b4e99f285ac" />
 
 
-### Prometheus Targets — All UP<img width="1842" height="630" alt="image" 
+### Prometheus Targets — All UP 
 <img width="1855" height="917" alt="Screenshot 2026-05-18 143127" src="https://github.com/user-attachments/assets/58857b29-5956-40e7-ab81-52b2079cfa00" />
 
 
