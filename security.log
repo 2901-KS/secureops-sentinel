@@ -1,0 +1,9 @@
+2026-05-18 07:40:56 | RATE_LIMIT | ip=203.0.113.42 | user=admin
+2026-05-18 07:40:56 | BLOCKED_IP | ip=172.16.0.8 | user=admin
+2026-05-18 07:40:56 | RATE_LIMIT | ip=198.51.100.7 | user=admin
+2026-05-18 07:40:56 | SUSPICIOUS_SCAN | ip=198.51.100.7 | user=admin
+2026-05-18 07:40:56 | SUSPICIOUS_SCAN | ip=192.168.1.10 | user=admin
+2026-05-18 07:41:27 | RATE_LIMIT | ip=10.0.0.55 | user=admin
+2026-05-18 07:41:27 | FAILED_LOGIN | ip=203.0.113.42 | user=admin
+2026-05-18 07:41:27 | SUSPICIOUS_SCAN | ip=10.0.0.55 | user=admin
+2026-05-18 07:41:27 | BLOCKED_IP | ip=10.0.0.55 | user=admin

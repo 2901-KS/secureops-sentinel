@@ -1,21 +1,12 @@
-version: "3.9"
-
 services:
 
-  # ── FastAPI Security Metrics App ─────────────────────────────────────────
   app:
     build: ./app
     container_name: secureops-app
     ports:
       - "8000:8000"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
 
-  # ── Prometheus ────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:v2.51.0
     container_name: secureops-prometheus
@@ -34,7 +25,25 @@ services:
     depends_on:
       - app
 
-  # ── Grafana ───────────────────────────────────────────────────────────────
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: secureops-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    restart: unless-stopped
+
+  pushgateway:
+    image: prom/pushgateway:v1.8.0
+    container_name: secureops-pushgateway
+    ports:
+      - "9091:9091"
+    restart: unless-stopped
+
   grafana:
     image: grafana/grafana:10.4.0
     container_name: secureops-grafana

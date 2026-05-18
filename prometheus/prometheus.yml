@@ -2,18 +2,24 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
-# ─── ALERTING RULES FILE ─────────────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
 rule_files:
   - "alert_rules.yml"
 
-# ─── SCRAPE TARGETS ──────────────────────────────────────────────────────────
 scrape_configs:
-
   - job_name: "secureops-sentinel"
     static_configs:
       - targets: ["app:8000"]
     metrics_path: "/metrics"
-    scrape_interval: 15s
+
+  - job_name: "pushgateway"
+    static_configs:
+      - targets: ["pushgateway:9091"]
+    honor_labels: true
 
   - job_name: "prometheus"
     static_configs:
