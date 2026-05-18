@@ -1,0 +1,43 @@
+groups:
+  - name: security_alerts
+    rules:
+
+      # Fire if brute-force rate exceeds 20 attempts in 1 minute
+      - alert: BruteForceSpike
+        expr: rate(security_brute_force_attempts_total[1m]) * 60 > 20
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Brute-force spike detected"
+          description: "More than 20 brute-force attempts per minute detected."
+
+      # Fire if more than 15 suspicious IPs active
+      - alert: HighSuspiciousIPCount
+        expr: security_suspicious_ip_count > 15
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of suspicious IPs"
+          description: "{{ $value }} IPs are currently flagged as suspicious."
+
+      # Fire if failed logins spike sharply
+      - alert: FailedLoginSpike
+        expr: rate(security_failed_login_total[2m]) * 60 > 30
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Failed login spike"
+          description: "Failed login rate exceeds 30/min."
+
+      # Fire if auth p95 latency exceeds 1s
+      - alert: HighAuthLatency
+        expr: histogram_quantile(0.95, rate(security_auth_latency_seconds_bucket[5m])) > 1.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Auth latency degraded"
+          description: "p95 auth latency is {{ $value }}s (threshold: 1s)."
