@@ -1,7 +1,7 @@
-# SecureOps Sentinel 🔐
+# SecureOps Sentinel 
 
-> Security Infrastructure Observability Stack  
-> Real-time threat monitoring using Prometheus, Grafana, and AWS CloudWatch
+> Security Infrastructure Observability Stack
+> Real-time threat monitoring using Prometheus, Grafana, AlertManager, and Slack
 
 ---
 
@@ -12,12 +12,15 @@ FastAPI /metrics  ──►  Prometheus (scrape every 15s)  ──►  Grafana d
      │                        │                                    │
      │                  alert_rules.yml                     8 security panels
      │                        │                              alert rules
-     ▼                        ▼
-Simulation endpoints    AlertManager (Phase 2)
-/simulate/brute-force
-/simulate/login-spike
-/simulate/rate-limit
+     ▼                        ▼                                    │
+Simulation endpoints    AlertManager  ──────────────────►  Slack #new-channel 🚨
+/simulate/brute-force        │
+/simulate/login-spike        │
+/simulate/rate-limit         ▼
+                        Pushgateway  ◄──  log_parser.sh (Bash)
 ```
+
+---
 
 ## Stack
 
@@ -26,7 +29,11 @@ Simulation endpoints    AlertManager (Phase 2)
 | FastAPI | Security event simulator + `/metrics` endpoint |
 | Prometheus | Scrapes and stores time-series metrics (15s interval) |
 | Grafana | Dashboards, visualisations, alert rules |
-| Docker Compose | Runs the full stack locally |
+| AlertManager | Routes alerts to Slack based on severity |
+| Pushgateway | Receives metrics pushed by Bash log parser |
+| Docker Compose | Orchestrates the full 5-container stack |
+
+---
 
 ## Metrics exposed
 
@@ -43,18 +50,40 @@ Simulation endpoints    AlertManager (Phase 2)
 
 ---
 
+## Screenshots
+
+### Grafana Dashboard — Live Security Metrics
+
+<img width="1845" height="786" alt="Screenshot 2026-05-18 143047" src="https://github.com/user-attachments/assets/b7130c38-a1fc-4c63-aa56-f2dc2db719df" />
+
+<img width="1842" height="630" alt="image" src="https://github.com/user-attachments/assets/bd1be248-6af7-44fa-adb7-d2b0fb485b14" />
+
+### Brute Force Spike — Real-time Detection
+<img width="1861" height="908" alt="Screenshot 2026-05-18 115707" src="https://github.com/user-attachments/assets/fa04bc89-15a8-46ec-a1f0-6b4e99f285ac" />
+
+
+### Prometheus Targets — All UP<img width="1842" height="630" alt="image" 
+<img width="1855" height="917" alt="Screenshot 2026-05-18 143127" src="https://github.com/user-attachments/assets/58857b29-5956-40e7-ab81-52b2079cfa00" />
+
+
+### FastAPI Docs — Simulation Endpoints
+<img width="1827" height="891" alt="Screenshot 2026-05-18 143143" src="https://github.com/user-attachments/assets/4c5adf48-71cf-4afe-9f22-dc30501d9b32" />
+
+
+### Slack Alert — CRITICAL BruteForceSpike
+<img width="1866" height="848" alt="Screenshot 2026-05-18 143240" src="https://github.com/user-attachments/assets/c722e20d-14dc-4c00-a65f-23d343798b5f" />
+
+
+---
+
 ## Quick start
 
 **Prerequisites:** Docker Desktop running on WSL2
 
 ```bash
-# 1. Clone / enter project
+git clone https://github.com/2901-KS/secureops-sentinel.git
 cd secureops-sentinel
-
-# 2. Build and start all services
 docker compose up --build -d
-
-# 3. Verify all containers are running
 docker compose ps
 ```
 
@@ -65,38 +94,56 @@ docker compose ps
 | FastAPI docs | http://localhost:8000/docs | — |
 | Prometheus | http://localhost:9090 | — |
 | Grafana | http://localhost:3000 | admin / sentinel123 |
+| AlertManager | http://localhost:9093 | — |
+| Pushgateway | http://localhost:9091 | — |
 
-**Grafana dashboard:**  
-Go to `Dashboards → SecureOps → SecureOps Sentinel`
+**Grafana dashboard:**
+`Dashboards → SecureOps → SecureOps Sentinel`
 
 ---
 
 ## Triggering alerts manually
 
-Use the FastAPI Swagger UI at `http://localhost:8000/docs` or curl:
-
 ```bash
-# Trigger a brute-force spike (50 attempts)
-curl -X POST "http://localhost:8000/simulate/brute-force?count=50"
+# Brute-force spike
+curl -X POST "http://localhost:8000/simulate/brute-force?count=100"
 
-# Spike failed logins
+# Failed login spike
 curl -X POST "http://localhost:8000/simulate/login-spike?count=30"
 
-# Rate limit burst on /api/admin
+# Rate limit burst
 curl -X POST "http://localhost:8000/simulate/rate-limit?endpoint=/api/admin&count=20"
 ```
+
+## Bash log parser (Pushgateway)
+
+```bash
+# Run in WSL
+chmod +x log_parser.sh
+./log_parser.sh
+```
+
+Parses `security.log` every 30s and pushes metrics to Pushgateway at `localhost:9091`.
+
+## Secrets management
+
+Slack webhook URL is stored in `alertmanager/alertmanager.yml` locally.
+This file is in `.gitignore` — never committed to version control.
+Use a `.env` file for all secrets in production.
+
+---
 
 ## Stopping
 
 ```bash
-docker compose down          # stop containers
-docker compose down -v       # stop + delete volumes (reset all data)
+docker compose down        # stop containers
+docker compose down -v     # stop + delete volumes
 ```
 
 ---
 
 ## Phase roadmap
 
-- [x] Phase 1 — Core metrics, Prometheus, Grafana dashboard
-- [ ] Phase 2 — AlertManager + Slack webhook alerts, Bash log parser
-- [ ] Phase 3 — AWS Lambda → CloudWatch integration, unified dashboard
+- [x] Phase 1 — Core metrics, Prometheus, Grafana dashboard (8 panels)
+- [x] Phase 2 — AlertManager, Slack webhook alerts, Bash log parser, Pushgateway
+- [ ] Phase 3 — AWS CloudWatch / GCP Cloud Operations integration (account setup pending )- working on it
